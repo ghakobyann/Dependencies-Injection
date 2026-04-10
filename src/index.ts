@@ -1,9 +1,9 @@
 import { createIoCContainer } from './ioc';
-
 import type { User, ApiConfig } from './types';
 
-const renderUsers = async (config: ApiConfig) => {
-  const ioc = createIoCContainer(config);
+const ioc = createIoCContainer();
+
+const renderUsers = async () => {
   const usersService = ioc.resolve('users');
   const users = await usersService.getUsers();
 
@@ -18,16 +18,15 @@ const renderUsers = async (config: ApiConfig) => {
 };
 
 const app = () => {
-  const config = (window as any).__CONFIG__;
+  const config: ApiConfig = (window as any).__CONFIG__;
   delete (window as any).__CONFIG__;
 
-  renderUsers(config.api);
+  ioc.register('config', config)
+  renderUsers();
 };
 
 window.onload = (event: Event) => {
-  const ioc = createIoCContainer((window as any).__CONFIG__?.api || {});
   const logger = ioc.resolve('logger');
-
   logger.info('Page is loaded.');
 
   app();
